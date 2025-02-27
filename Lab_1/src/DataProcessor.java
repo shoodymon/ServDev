@@ -6,8 +6,13 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.awt.Desktop;
+import java.net.URI;
 
 public class DataProcessor {
+
+    // Константа для хранения базового URL
+    private static final String BASE_HOROSCOPE_URL = "https://horoscopes.rambler.ru/";
 
     public static void main(String[] args) {
         // Создаем объект Scanner для получения ввода с клавиатуры
@@ -40,9 +45,10 @@ public class DataProcessor {
 
         // Определение знака зодиака
         String zodiacSign = determineZodiacSign(birthDate);
+        String zodiacUrl = getZodiacUrl(zodiacSign);
 
-        // Предсказание для знака зодиака
-        String prediction = generatePrediction(zodiacSign);
+        // Базовая информация о знаке зодиака
+        String zodiacInfo = getZodiacInfo(zodiacSign);
 
         // Анализ даты рождения
         Map<String, String> birthDateAnalysis = analyzeBirthDate(birthDate);
@@ -56,15 +62,45 @@ public class DataProcessor {
         System.out.println("Знак зодиака: " + zodiacSign);
         System.out.println("------------------------------");
 
-        System.out.println("\nАстрологический прогноз:");
-        System.out.println(prediction);
+        System.out.println("\nКраткая информация о знаке:");
+        System.out.println(zodiacInfo);
 
         System.out.println("\nАнализ даты рождения:");
         for (Map.Entry<String, String> entry : birthDateAnalysis.entrySet()) {
             System.out.println(entry.getKey() + ": " + entry.getValue());
         }
 
-        System.out.println("\nСпасибо за использование нашей программы!");
+        // Меню выбора действий
+        boolean exit = false;
+        while (!exit) {
+            System.out.println("\nВыберите действие:");
+            System.out.println("1. Получить ежедневный гороскоп на сайте");
+            System.out.println("2. Получить астрологическую совместимость");
+            System.out.println("3. Просмотреть финансовый гороскоп");
+            System.out.println("4. Выход из программы");
+
+            System.out.print("Ваш выбор: ");
+            String choice = scanner.nextLine().trim();
+
+            switch (choice) {
+                case "1":
+                    openWebsite(zodiacUrl);
+                    break;
+                case "2":
+                    openWebsite(BASE_HOROSCOPE_URL + "sovmestimost-znakov-zodiaka/");
+                    break;
+                case "3":
+                    openWebsite(zodiacUrl + "/career/");
+                    break;
+                case "4":
+                    exit = true;
+                    System.out.println("Спасибо за использование нашей программы!");
+                    break;
+                default:
+                    System.out.println("Неверный выбор. Пожалуйста, попробуйте снова.");
+            }
+        }
+
         scanner.close();
     }
 
@@ -129,22 +165,40 @@ public class DataProcessor {
         }
     }
 
-    private static String generatePrediction(String zodiacSign) {
-        Map<String, String> predictions = new HashMap<>();
-        predictions.put("Овен", "Ваша энергия и инициативность помогут вам добиться успеха. Не бойтесь рисковать, но будьте внимательны к деталям. Сейчас благоприятное время для новых начинаний.");
-        predictions.put("Телец", "Ваше упорство принесет плоды. Финансовая ситуация стабилизируется, а отношения с близкими укрепятся. Уделите внимание своему здоровью и питанию.");
-        predictions.put("Близнецы", "Ваша коммуникабельность откроет новые двери. Будьте готовы к неожиданным предложениям и встречам. Интеллектуальная активность сейчас на пике.");
-        predictions.put("Рак", "Семейные ценности выходят на первый план. Интуиция поможет вам принять правильные решения. Берегите эмоциональные ресурсы и учитесь отдыхать.");
-        predictions.put("Лев", "Ваша харизма привлекает внимание окружающих. Используйте это для достижения целей. Творческий потенциал сейчас высок – не упустите возможность его реализовать.");
-        predictions.put("Дева", "Аналитические способности помогут решить сложные задачи. Будьте внимательны к деталям, но не забывайте о целостной картине. Здоровье требует заботы.");
-        predictions.put("Весы", "Гармония и баланс – ваши ключевые слова. Отношения развиваются в положительном направлении. Не бойтесь принимать решения, опираясь на интуицию.");
-        predictions.put("Скорпион", "Ваша интенсивность и страсть помогут преодолеть любые препятствия. Будьте готовы к глубоким трансформациям. Доверяйте своей интуиции.");
-        predictions.put("Стрелец", "Ваш оптимизм заразителен. Новые горизонты открываются перед вами. Путешествия и обучение принесут особую пользу. Расширяйте свои границы.");
-        predictions.put("Козерог", "Ваша дисциплина и упорство приведут к успеху. Карьерные достижения не за горами. Уделите внимание долгосрочным планам и целям.");
-        predictions.put("Водолей", "Ваша оригинальность мышления – ключ к успеху. Социальные связи укрепляются, новые идеи рождаются. Технологии сыграют важную роль в вашей жизни.");
-        predictions.put("Рыбы", "Ваша чувствительность и интуиция на пике. Творческий потенциал высок. Духовные практики принесут особую пользу. Берегите свои эмоциональные ресурсы.");
+    private static String getZodiacUrl(String zodiacSign) {
+        Map<String, String> zodiacUrls = new HashMap<>();
+        zodiacUrls.put("Овен", BASE_HOROSCOPE_URL + "aries");
+        zodiacUrls.put("Телец", BASE_HOROSCOPE_URL + "taurus");
+        zodiacUrls.put("Близнецы", BASE_HOROSCOPE_URL + "gemini");
+        zodiacUrls.put("Рак", BASE_HOROSCOPE_URL + "cancer");
+        zodiacUrls.put("Лев", BASE_HOROSCOPE_URL + "leo");
+        zodiacUrls.put("Дева", BASE_HOROSCOPE_URL + "virgo");
+        zodiacUrls.put("Весы", BASE_HOROSCOPE_URL + "libra");
+        zodiacUrls.put("Скорпион", BASE_HOROSCOPE_URL + "scorpio");
+        zodiacUrls.put("Стрелец", BASE_HOROSCOPE_URL + "sagittarius");
+        zodiacUrls.put("Козерог", BASE_HOROSCOPE_URL + "capricorn");
+        zodiacUrls.put("Водолей", BASE_HOROSCOPE_URL + "aquarius");
+        zodiacUrls.put("Рыбы", BASE_HOROSCOPE_URL + "pisces");
 
-        return predictions.getOrDefault(zodiacSign, "Индивидуальный прогноз недоступен.");
+        return zodiacUrls.getOrDefault(zodiacSign, BASE_HOROSCOPE_URL);
+    }
+
+    private static String getZodiacInfo(String zodiacSign) {
+        Map<String, String> info = new HashMap<>();
+        info.put("Овен", "Стихия: Огонь. Управляющая планета: Марс. Характеристики: энергичность, инициативность, смелость, импульсивность.");
+        info.put("Телец", "Стихия: Земля. Управляющая планета: Венера. Характеристики: надежность, терпение, практичность, упрямство.");
+        info.put("Близнецы", "Стихия: Воздух. Управляющая планета: Меркурий. Характеристики: общительность, любознательность, адаптивность, непостоянство.");
+        info.put("Рак", "Стихия: Вода. Управляющая планета: Луна. Характеристики: эмоциональность, интуиция, заботливость, чувствительность.");
+        info.put("Лев", "Стихия: Огонь. Управляющая планета: Солнце. Характеристики: уверенность, творчество, великодушие, гордость.");
+        info.put("Дева", "Стихия: Земля. Управляющая планета: Меркурий. Характеристики: аналитичность, практичность, внимание к деталям, критичность.");
+        info.put("Весы", "Стихия: Воздух. Управляющая планета: Венера. Характеристики: дипломатичность, справедливость, гармония, нерешительность.");
+        info.put("Скорпион", "Стихия: Вода. Управляющие планеты: Марс и Плутон. Характеристики: страстность, решительность, проницательность, интенсивность.");
+        info.put("Стрелец", "Стихия: Огонь. Управляющая планета: Юпитер. Характеристики: оптимизм, искренность, любовь к свободе, импульсивность.");
+        info.put("Козерог", "Стихия: Земля. Управляющая планета: Сатурн. Характеристики: целеустремленность, ответственность, дисциплина, консерватизм.");
+        info.put("Водолей", "Стихия: Воздух. Управляющие планеты: Уран и Сатурн. Характеристики: изобретательность, независимость, оригинальность, эксцентричность.");
+        info.put("Рыбы", "Стихия: Вода. Управляющие планеты: Нептун и Юпитер. Характеристики: интуитивность, сострадание, творчество, мечтательность.");
+
+        return info.getOrDefault(zodiacSign, "Информация недоступна.");
     }
 
     private static Map<String, String> analyzeBirthDate(LocalDate birthDate) {
@@ -217,6 +271,50 @@ public class DataProcessor {
             return "Осень";
         } else {
             return "Зима";
+        }
+    }
+
+    private static void openWebsite(String url) {
+        try {
+            openWebPage(url);
+            System.out.println("Браузер открыт с адресом: " + url);
+            System.out.println("Если страница не открылась автоматически, посетите указанный адрес вручную.");
+        } catch (Exception e) {
+            System.out.println("Не удалось открыть браузер автоматически.");
+            System.out.println("Пожалуйста, посетите следующий адрес вручную: " + url);
+        }
+    }
+
+    private static void openWebPage(String url) throws Exception {
+        URI uri = new URI(url);
+        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+            Desktop.getDesktop().browse(uri);
+        } else {
+            // Альтернативные способы открытия браузера на различных ОС
+            String os = System.getProperty("os.name").toLowerCase();
+            Runtime rt = Runtime.getRuntime();
+
+            if (os.contains("win")) {
+                // Windows
+                rt.exec("rundll32 url.dll,FileProtocolHandler " + url);
+            } else if (os.contains("mac")) {
+                // macOS
+                rt.exec("open " + url);
+            } else if (os.contains("nix") || os.contains("nux")) {
+                // Linux
+                String[] browsers = {"google-chrome", "firefox", "mozilla", "opera", "epiphany", "konqueror", "netscape", "links", "lynx"};
+
+                StringBuilder cmd = new StringBuilder();
+                for (int i = 0; i < browsers.length; i++) {
+                    if (i == 0) {
+                        cmd.append(String.format("%s \"%s\"", browsers[i], url));
+                    } else {
+                        cmd.append(String.format(" || %s \"%s\"", browsers[i], url));
+                    }
+                }
+
+                rt.exec(new String[]{"sh", "-c", cmd.toString()});
+            }
         }
     }
 }
